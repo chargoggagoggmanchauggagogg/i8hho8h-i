@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quick Quiz: Math & ELA</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light dark;
+  --bg:#eaf2ff;--card:#fffefa;--grid:#cfe0fb;--ink:#14264d;--mut:#5a6b8f;--line:#b9cbef;
+  --pri:#ffc933;--priInk:#14264d;--ok:#12803a;--okbg:#d7f5e1;--bad:#b42318;--badbg:#fde1de;--sel:#2f5fd0;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1a33;--card:#17254a;--grid:#223664;--ink:#eef3ff;--mut:#a5b4d8;--line:#34497f;
+  --ok:#6ee7a0;--okbg:#14412a;--bad:#ff9b92;--badbg:#4a1d1d;--sel:#8fb0ff;}}
+:root[data-theme="dark"]{
+  --bg:#0f1a33;--card:#17254a;--grid:#223664;--ink:#eef3ff;--mut:#a5b4d8;--line:#34497f;
+  --ok:#6ee7a0;--okbg:#14412a;--bad:#ff9b92;--badbg:#4a1d1d;--sel:#8fb0ff;}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Fredoka","Trebuchet MS",system-ui,sans-serif;font-size:18px;line-height:1.4}
+main{max-width:640px;margin:0 auto;padding:20px 16px 40px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+h1{font-size:1.6rem;margin:0;font-weight:700}
+.set{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin-bottom:14px}
+.seg{display:flex;border:2px solid var(--line);border-radius:999px;overflow:hidden;background:var(--card)}
+.seg button{border:0;background:none;color:var(--ink);font:inherit;font-weight:500;padding:8px 18px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.seg button:disabled{cursor:not-allowed}
+.seg button:disabled:not([aria-pressed="true"]){opacity:.45}
+select,textarea{font:inherit;color:var(--ink);background:var(--card);border:2px solid var(--line);border-radius:12px;padding:7px 10px}
+.score{display:flex;flex-wrap:wrap;gap:6px 18px;color:var(--mut);font-weight:500;margin-bottom:10px}
+.score b{color:var(--ink)}
+.card{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:22px 20px;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:28px 28px}
+.tag{font-size:.9rem;color:var(--mut);font-weight:500}
+.q{margin:14px 0 16px;font-weight:700;line-height:1.2;min-height:3.2rem;word-break:break-word}
+.q.math{font-size:clamp(2.2rem,9vw,3.4rem);letter-spacing:.02em}
+.q.ela{font-size:1.5rem}
+.snd{display:inline-flex;gap:8px;align-items:center;border:2px solid var(--ink);background:var(--card);color:var(--ink);font:inherit;font-weight:600;border-radius:999px;padding:8px 16px;cursor:pointer}
+.snd:hover{background:var(--ink);color:var(--bg)}
+.choices{display:grid;gap:10px;margin:16px 0 0}
+.c{display:flex;gap:12px;align-items:center;text-align:left;font:inherit;font-weight:500;color:var(--ink);background:var(--card);border:2px solid var(--line);border-radius:14px;padding:10px 14px;cursor:pointer}
+.c b{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--ink);color:var(--bg);flex:none}
+.c:hover{border-color:var(--sel)}
+.sp{order:3;margin-left:auto;font-style:normal;padding:2px 8px;border-radius:999px;border:2px solid var(--line)}
+.sp:hover{background:var(--ink);color:var(--bg)}
+.c.ok{background:var(--okbg);border-color:var(--ok)}
+.c.bad{background:var(--badbg);border-color:var(--bad)}
+.row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+input[type=text],input[type=password],input[type=number],input[type=time]{font:inherit;color:var(--ink);background:var(--card);border:2px solid var(--line);border-radius:12px;padding:8px 12px}
+#ans{flex:1;min-width:0;font-size:1.3rem;font-weight:600;border-color:var(--ink);border-radius:14px;padding:10px 14px}
+.pri{font:inherit;font-weight:700;background:var(--pri);color:var(--priInk);border:2px solid var(--priInk);border-radius:14px;padding:10px 22px;cursor:pointer}
+#fb{min-height:2.6rem;margin-top:12px;font-weight:600}
+#fb.ok{color:var(--ok)}#fb.bad{color:var(--bad)}
+.hint{font-size:.85rem;color:var(--mut);margin-top:8px}
+#lockbar{background:var(--badbg);color:var(--bad);border:2px solid var(--bad);border-radius:14px;padding:10px 14px;margin-bottom:12px;font-weight:600}
+#end p{font-weight:500}
+#pp{position:fixed;inset:0;z-index:50;background:rgba(10,20,45,.78);overflow:auto;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px))}
+#pp[hidden]{display:none}
+.pc{max-width:520px;margin:0 auto;background:var(--card);border:2px solid var(--line);border-radius:20px;padding:20px}
+.pc h2{margin:0 0 6px;font-size:1.3rem}
+.f{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:12px 0;font-weight:500}
+.f input[type=checkbox]{width:22px;height:22px}
+.f input[type=number]{width:80px}
+textarea{width:100%;min-height:110px;font-size:.9rem}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--sel);outline-offset:2px}
+</style>
+</head>
+<body>
+<main>
+  <div class="top">
+    <h1>Quick Quiz 🧮</h1>
+    <button class="snd" id="parent" type="button">⚙ Parent</button>
+  </div>
+  <div class="set">
+    <div class="seg" id="subj" role="group" aria-label="Subject">
+      <button data-s="math" aria-pressed="false">Math</button>
+      <button data-s="ela" aria-pressed="false">ELA</button>
+      <button data-s="mix" aria-pressed="true">Mixed</button>
+    </div>
+    <span id="sl" class="hint" hidden>🔒 Locked by parent</span>
+    <label id="gw">Grade <select id="grade"></select></label>
+  </div>
+  <div class="score" aria-live="polite">
+    <span>Correct: <b id="sc">0</b> / <b id="tot">0</b></span>
+    <span>Streak: <b id="st">0</b> 🔥</span>
+    <span>Round: <b id="rq">0</b>/<b id="rn">10</b></span>
+  </div>
+  <div id="lockbar" hidden></div>
+  <section class="card" id="qcard">
+    <div class="tag" id="tag"></div>
+    <div class="q" id="q"></div>
+    <button class="snd" id="snd" type="button">🔊 Hear question</button>
+    <div class="choices" id="ch"></div>
+    <div class="row">
+      <input type="text" id="ans" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Your answer">
+      <button id="go" class="pri" type="button">Check</button>
+    </div>
+    <div class="hint" id="hint"></div>
+    <div id="fb" role="status" aria-live="polite"></div>
+  </section>
+  <section class="card" id="end" hidden>
+    <div class="q ela" id="endt"></div>
+    <p id="endm"></p>
+    <div class="row">
+      <button id="again" type="button" class="snd">Play another round</button>
+      <button id="stop" type="button" class="snd">Stop for now</button>
+    </div>
+  </section>
+</main>
+
+<div id="pp" hidden>
+  <div class="pc">
+    <div id="pv1">
+      <h2 id="pt1">Parent PIN</h2>
+      <p class="hint" id="pt2"></p>
+      <div class="row"><input type="password" id="pin" inputmode="numeric" maxlength="4" placeholder="4 digits" autocomplete="off"><button id="pinok" class="pri" type="button">OK</button><button id="pinx" class="snd" type="button">Cancel</button></div>
+      <div class="hint" id="pinfb"></div>
+    </div>
+    <div id="pv2" hidden>
+      <h2>Parent controls</h2>
+      <div class="f"><span>Subject</span><select id="pmode"><option value="mix">Mixed</option><option value="math">Math only</option><option value="ela">ELA only</option></select></div>
+      <div class="f"><span>Lock subject (child can’t change it)</span><input type="checkbox" id="plock"></div>
+      <div class="f"><span>Include Math</span><input type="checkbox" id="pm"></div>
+      <div class="f"><span>Include ELA</span><input type="checkbox" id="pe"></div>
+      <div class="f"><span>Grade</span><select id="pg"></select></div>
+      <div class="f"><span>Child can change grade</span><input type="checkbox" id="pc"></div>
+      <div class="f"><span>Questions per round</span><input type="number" id="pn" min="1" max="50"></div>
+      <div class="f"><span>Correct answers needed to unlock</span><input type="number" id="pneed" min="1" max="50"></div>
+      <div class="f"><span>Answer style</span>
+        <select id="ps"><option value="mix">Mix of both</option><option value="mc">Multiple choice only</option><option value="type">Typing when possible</option></select></div>
+      <div class="f"><span>Voice</span><select id="pvoice" style="max-width:230px"></select></div>
+      <div class="f"><span>Speaking speed</span><input type="range" id="prate" min="0.6" max="1.2" step="0.05"></div>
+      <div class="row" style="margin-top:0"><button id="ptest" class="snd" type="button">🔊 Test voice</button></div>
+      <div class="f"><span>Read the answer aloud after each question</span><input type="checkbox" id="psa"></div>
+      <div class="f"><span>Read the answer choices aloud with the question</span><input type="checkbox" id="pch"></div>
+      <div class="f"><span>Read each new question aloud automatically</span><input type="checkbox" id="pq"></div>
+      <div class="f"><span>Daily quiz time (locks until passed)</span><input type="time" id="ptime"></div>
+      <div class="f"><span>Only use my custom questions</span><input type="checkbox" id="po"></div>
+      <label for="pcu" class="hint">Custom questions, one per line. Typed: question|answer. Multiple choice: question|answer|wrong|wrong|wrong</label>
+      <textarea id="pcu" spellcheck="false"></textarea>
+      <div class="f"><span>New PIN (leave blank to keep)</span><input type="password" id="pnew" inputmode="numeric" maxlength="4" style="width:100px"></div>
+      <div class="row"><button id="psave" class="pri" type="button">Save</button><button id="punlock" class="snd" type="button">Unlock today</button><button id="pclose" class="snd" type="button">Close</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const R=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const P=a=>a[R(0,a.length-1)];
+const sh=a=>a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(x=>x[1]);
+const f1=n=>Math.round(n*10)/10;
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+const DEF={pin:'',math:true,ela:true,grade:3,child:true,n:10,need:7,style:'mix',time:'',custom:'',only:false,sayAns:true,autoQ:false,sayCh:true,voice:'',rate:.9,mode:'mix',lockSub:false};
+let cfg={...DEF};try{cfg={...DEF,...JSON.parse(store.get('qq-cfg')||'{}')}}catch(e){}
+const save=()=>store.set('qq-cfg',JSON.stringify(cfg));
+const GL=['K','1','2','3','4','5','6','7','8','9','10','11','12','College'];
+const W={'+':'plus','−':'minus','×':'times','÷':'divided by'};
+const SUP=['','','²','³','⁴'];
+const m=(a,op,b,ans)=>({q:`${a} ${op} ${b} = ?`,say:`What is ${a} ${W[op]} ${b}?`,a:ans});
+
+const MATH={
+0:[()=>{const a=R(1,5),b=R(1,5);return m(a,'+',b,a+b)},()=>{const a=R(2,10),b=R(1,a-1);return m(a,'−',b,a-b)}],
+1:[()=>{const a=R(1,10),b=R(1,10);return m(a,'+',b,a+b)},()=>{const a=R(5,20),b=R(1,a);return m(a,'−',b,a-b)}],
+2:[()=>{const a=R(10,60),b=R(10,39);return m(a,'+',b,a+b)},()=>{const a=R(30,99),b=R(10,a-1);return m(a,'−',b,a-b)}],
+3:[()=>{const a=R(2,10),b=R(2,10);return m(a,'×',b,a*b)},()=>{const a=R(2,10),b=R(2,10);return m(a*b,'÷',a,b)},()=>{const a=R(100,500),b=R(100,400);return m(a,'+',b,a+b)}],
+4:[()=>{const a=R(12,99),b=R(3,9);return m(a,'×',b,a*b)},()=>{const a=R(3,9),b=R(10,25);return m(a*b,'÷',a,b)},()=>{const a=R(1000,6000),b=R(500,3000);return m(a+b,'−',b,a)}],
+5:[()=>{const a=R(11,24),b=R(12,19);return m(a,'×',b,a*b)},()=>{const a=f1(R(10,90)/10),b=f1(R(10,90)/10);return m(a,'+',b,f1(a+b))},
+   ()=>{const a=R(2,9),b=R(2,9),c=R(2,9);return{q:`${a} + ${b} × ${c} = ?`,say:`What is ${a} plus ${b} times ${c}?`,a:a+b*c}}],
+6:[()=>{const p=P([10,20,25,50]),n=P([20,40,60,80,100]);return{q:`${p}% of ${n} = ?`,say:`What is ${p} percent of ${n}?`,a:p*n/100}},
+   ()=>{const a=R(2,12),b=R(1,15);return{q:`−${a} + ${b} = ?`,say:`What is negative ${a} plus ${b}?`,a:b-a}},
+   ()=>{const a=R(2,9);return{q:`${a}² = ?`,say:`What is ${a} squared?`,a:a*a}},
+   ()=>{const x=R(2,15),b=R(2,12),c=R(2,6);return{q:`${c}x + ${b} = ${c*x+b}, so x = ?`,say:`If ${c} x plus ${b} equals ${c*x+b}, what is x?`,a:x}}],
+7:[()=>{const a=R(2,15),b=R(2,15);return{q:`−${a} − ${b} = ?`,say:`What is negative ${a} minus ${b}?`,a:-(a+b)}},
+   ()=>{const a=R(2,12),b=R(2,9);return{q:`−${a} × ${b} = ?`,say:`What is negative ${a} times ${b}?`,a:-a*b}},
+   ()=>{const p=P([15,30,35,60]),n=P([20,40,60,100,200]);return{q:`${p}% of ${n} = ?`,say:`What is ${p} percent of ${n}?`,a:p*n/100}},
+   ()=>{const x=R(-6,12),c=R(2,7),b=R(1,12);return{q:`${c}x + ${b} = ${c*x+b}, so x = ?`,say:`If ${c} x plus ${b} equals ${c*x+b}, what is x?`,a:x}}],
+8:[()=>{const a=R(4,15);return{q:`√${a*a} = ?`,say:`What is the square root of ${a*a}?`,a:a}},
+   ()=>{const a=R(2,5),b=R(2,4);return{q:`${a}${SUP[b]} = ?`,say:`What is ${a} to the power of ${b}?`,a:a**b}},
+   ()=>{const x=R(-5,10),c=R(2,7),b=R(1,12);return{q:`${c}x − ${b} = ${c*x-b}, so x = ?`,say:`If ${c} x minus ${b} equals ${c*x-b}, what is x?`,a:x}},
+   ()=>{const t=P([[3,4,5],[5,12,13],[8,15,17],[6,8,10]]);return{q:`Legs ${t[0]} and ${t[1]}. Hypotenuse = ?`,say:`A right triangle has legs ${t[0]} and ${t[1]}. What is the hypotenuse?`,a:t[2]}}]
+};
+
+const NM=['Maya','Leo','Sam','Ava','Noah','Zoe'],IT=['apples','stickers','marbles','books','cookies'];
+const Q=(q,say,a)=>({q,say:say||q,a});
+const gcd=(a,b)=>b?gcd(b,a%b):a;
+const add=(k,...f)=>{MATH[k]=(MATH[k]||[]).concat(f)};
+add(0,()=>{const a=R(1,5),b=R(1,5);return Q(`__ + ${a} = ${a+b}`,`What number plus ${a} equals ${a+b}?`,b)},
+ ()=>{const a=R(1,6),b=R(1,4);return Q(`${P(NM)} has ${a} ${P(IT)}. A friend gives ${b} more. How many now?`,0,a+b)});
+add(1,()=>{const a=R(1,9),b=R(1,9);return Q(`__ + ${a} = ${a+b}`,`What number plus ${a} equals ${a+b}?`,b)},
+ ()=>{const a=R(8,20),b=R(1,7);return Q(`${P(NM)} has ${a} ${P(IT)} and gives away ${b}. How many are left?`,0,a-b)});
+add(2,()=>{const s=P([2,5,10]),a=s*R(1,4);return Q(`${a}, ${a+s}, ${a+2*s}, __`,`What number comes next? ${a}, ${a+s}, ${a+2*s}`,a+3*s)},
+ ()=>{const a=R(20,60),b=R(10,30);return Q(`${P(NM)} has ${a} ${P(IT)} and finds ${b} more. How many in all?`,0,a+b)});
+add(3,()=>{const l=R(2,12),w=R(2,9);return Q(`A rectangle is ${l} by ${w}. What is its area?`,0,l*w)},
+ ()=>{const l=R(2,12),w=R(2,9);return Q(`A rectangle is ${l} by ${w}. What is its perimeter?`,0,2*(l+w))},
+ ()=>{const a=R(2,9),b=R(2,9);return Q(`${P(NM)} has ${a} bags with ${b} ${P(IT)} in each. How many in all?`,0,a*b)});
+add(4,()=>{const n=R(1100,9899);return Q(`Round ${n} to the nearest hundred.`,0,Math.round(n/100)*100)},
+ ()=>{const h=R(2,9);return Q(`How many minutes are in ${h} hours?`,0,60*h)},
+ ()=>{const l=R(10,40),w=R(5,20);return Q(`Perimeter of a ${l} by ${w} rectangle?`,`What is the perimeter of a rectangle that is ${l} by ${w}?`,2*(l+w))});
+add(5,()=>{const t=P([[1,2,.5],[1,4,.25],[3,4,.75],[1,5,.2],[3,5,.6],[7,10,.7]]);return Q(`${t[0]}/${t[1]} as a decimal = ?`,`What is ${t[0]} over ${t[1]} as a decimal?`,t[2])},
+ ()=>{const l=R(2,9),w=R(2,9),h=R(2,9);return Q(`Volume of a box ${l} by ${w} by ${h}?`,0,l*w*h)},
+ ()=>{const k=R(5,30);return Q(`Mean of ${sh([k-3,k+1,k+4,k-2]).join(', ')}?`,0,k)});
+add(6,()=>{const g=R(2,9),a=g*R(2,5);let b=g*R(2,5);if(b===a)b+=g;return Q(`GCF of ${a} and ${b} = ?`,`What is the greatest common factor of ${a} and ${b}?`,gcd(a,b))},
+ ()=>{const b=2*R(3,10),h=R(3,12);return Q(`Triangle area: base ${b}, height ${h}`,`What is the area of a triangle with base ${b} and height ${h}?`,b*h/2)},
+ ()=>{const s=sh([R(1,9),R(10,19),R(20,29),R(30,39),R(40,49)]);return Q(`Median of ${s.join(', ')}?`,0,[...s].sort((x,y)=>x-y)[2])});
+add(7,()=>{const p=P([40,80,100,200]),x=P([10,25,50]);return Q(`$${p} goes up ${x}%. New price in dollars?`,`A price of ${p} dollars goes up ${x} percent. What is the new price in dollars?`,p*(100+x)/100)},
+ ()=>{const n=R(3,9),p=R(2,9);return Q(`${n} notebooks cost $${n*p}. Price of one?`,`${n} notebooks cost ${n*p} dollars. What is the price of one notebook?`,p)},
+ ()=>{const c=R(2,6),b=R(1,8),x=R(-3,6);return Q(`${c}(x + ${b}) when x = ${x}`,`What is ${c} times the quantity x plus ${b}, when x equals ${x}?`,c*(x+b))});
+add(8,()=>{const x1=R(-3,3),y1=R(-4,4),d=R(1,4),mm=P([-3,-2,-1,1,2,3,4]);return Q(`Slope through (${x1}, ${y1}) and (${x1+d}, ${y1+mm*d})`,0,mm)},
+ ()=>{const x=R(2,9),y=R(1,x-1);return Q(`x + y = ${x+y} and x − y = ${x-y}. x = ?`,`If x plus y equals ${x+y} and x minus y equals ${x-y}, what is x?`,x)});
+add(9,()=>{const r=R(1,5),s=R(r+1,9);return Q(`x² − ${r+s}x + ${r*s} = 0. Larger root x = ?`,`Solve x squared minus ${r+s} x plus ${r*s} equals 0. What is the larger root?`,s)},
+ ()=>{const b=R(1,9),c=R(1,9),x=R(-3,4);return Q(`f(x) = x² + ${b}x − ${c}. f(${x}) = ?`,`If f of x equals x squared plus ${b} x minus ${c}, what is f of ${x}?`,x*x+b*x-c)},
+ ()=>{const a=R(2,3),b=R(2,4);return Q(`x${SUP[a]} · x${SUP[b]} = x^?`,`x to the ${a} times x to the ${b} equals x to what power?`,a+b)},
+ ()=>{const m=R(-4,5)||2,b=R(-6,6),x=R(1,6);return Q(`y = ${m}x ${b<0?'−':'+'} ${Math.abs(b)}. y when x = ${x}?`,`If y equals ${m} x ${b<0?'minus':'plus'} ${Math.abs(b)}, what is y when x is ${x}?`,m*x+b)});
+add(10,()=>{const n=R(3,10);return Q(`Angle sum of a ${n}-sided polygon (degrees)?`,0,(n-2)*180)},
+ ()=>{const a=R(-5,10),d=R(2,6);return Q(`Arithmetic sequence: first term ${a}, difference ${d}. 10th term?`,0,a+9*d)},
+ ()=>{const k=R(2,8);return Q(`log₂(${2**k}) = ?`,`What is log base 2 of ${2**k}?`,k)},
+ ()=>{const n=R(4,12);return Q(`${n} people each shake hands once with everyone else. Total handshakes?`,0,n*(n-1)/2)});
+add(11,()=>{const t=P([['sin(30°)','sine of 30 degrees',.5],['cos(60°)','cosine of 60 degrees',.5],['tan(45°)','tangent of 45 degrees',1],['sin(90°)','sine of 90 degrees',1],['cos(90°)','cosine of 90 degrees',0]]);return Q(`${t[0]} = ?`,`What is the ${t[1]}?`,t[2])},
+ ()=>{const n=R(4,20);return Q(`Sum of 1 + 2 + 3 + … + ${n} = ?`,0,n*(n+1)/2)},
+ ()=>{const a=R(1,6),b=R(1,6);return Q(`(${a} + ${b}i)(${a} − ${b}i) = ?`,`What is ${a} plus ${b} i, times ${a} minus ${b} i?`,a*a+b*b)},
+ ()=>{const a=R(1,4),r=R(2,4);return Q(`Geometric sequence: first term ${a}, ratio ${r}. 5th term?`,0,a*r**4)},
+ ()=>{const n=R(3,7);return Q(`${n}! = ?`,`What is ${n} factorial?`,[1,1,2,6,24,120,720,5040][n])});
+add(12,()=>{const a=R(1,5),b=R(-6,6)||3,c=R(1,4);return Q(`d/dx (${a}x² ${b<0?'−':'+'} ${Math.abs(b)}x) at x = ${c}`,`What is the derivative of ${a} x squared ${b<0?'minus':'plus'} ${Math.abs(b)} x, at x equals ${c}?`,2*a*c+b)},
+ ()=>{const c=R(1,9);return Q(`lim x→${c} (x² − ${c*c})/(x − ${c}) = ?`,`What is the limit as x approaches ${c} of x squared minus ${c*c}, over x minus ${c}?`,2*c)},
+ ()=>{const a=R(1,5),k=R(1,5);return Q(`∫₀^${k} ${2*a}x dx = ?`,`What is the integral from 0 to ${k} of ${2*a} x dx?`,a*k*k)},
+ ()=>{const k=R(1,9);return Q(`ln(e^${k}) = ?`,`What is the natural log of e to the ${k}?`,k)});
+add(13,()=>{const a=R(1,4),c=R(-3,4);return Q(`d/dx (x³ − ${a}x) at x = ${c}`,`What is the derivative of x cubed minus ${a} x, at x equals ${c}?`,3*c*c-a)},
+ ()=>{const a=R(1,4),k=R(1,4);return Q(`∫₀^${k} ${3*a}x² dx = ?`,`What is the integral from 0 to ${k} of ${3*a} x squared dx?`,a*k**3)},
+ ()=>{const a=R(1,6),b=R(1,6),c=R(1,6),d=R(1,6);return Q(`det [${a} ${b}; ${c} ${d}] = ?`,`What is the determinant of the 2 by 2 matrix with rows ${a}, ${b} and ${c}, ${d}?`,a*d-b*c)},
+ ()=>{const n=P([8,12,20,40]),p=P([.25,.5]);return Q(`Binomial: n = ${n}, p = ${p}. Mean = ?`,0,n*p)},
+ ()=>{const u=[R(-3,5),R(-3,5),R(-3,5)],v=[R(-3,5),R(-3,5),R(-3,5)];return Q(`(${u.join(', ')}) · (${v.join(', ')}) = ?`,0,u[0]*v[0]+u[1]*v[1]+u[2]*v[2])});
+
+// question|answer|wrong|wrong|wrong  (a leading ~ means it can be typed)
+const ELA={
+0:["~How many letters are in the word cat?|3|2|4|5","Which word rhymes with cat?|hat|dog|sun|bed","Which word starts with the same sound as ball?|bat|cup|sun|fish","Which is a color word?|red|run|cat|big","~How many syllables are in the word apple?|2|1|3|4"],
+1:["Which word rhymes with cat?|hat|dog|sun|bed","Pick the correct spelling.|friend|freind|frend|fiend","~Fill in the blank: I ___ a red ball.|have|has|having|haved","What is the opposite of hot?|cold|warm|big|soft","~How many syllables are in the word banana?|3|1|2|4"],
+2:["Pick the correct spelling.|because|becuase|becaus|becose","~What is the plural of child?|children|childs|childen|childrens","What is the opposite of begin?|end|start|open|go","Which sentence is correct?|She runs fast.|She run fast.|She running fast.|She runned fast.","What is a synonym for big?|large|tiny|slow|cold"],
+3:["~Choose the correct word: They left ___ bags at home.|their|there|they’re|thare","What is the root word in unhappy?|happy|un|unhap|py","Pick the correct spelling.|necessary|neccessary|necesary|necessery","~What is the plural of leaf?|leaves|leafs|leafes|leavs","Which word is an adjective? The fluffy cloud floated.|fluffy|cloud|floated|the"],
+4:["~Choose the correct word: ___ going to be late.|We’re|Were|Where|Wear","Which word is an adverb? She quickly ran home.|quickly|ran|home|she","Pick the correct spelling.|environment|enviroment|enviornment|envirenment","It’s raining cats and dogs is an example of a(n)…|idiom|simile|synonym|prefix","~Choose the right word: The dog wagged ___ tail.|its|it’s|its’|their"],
+5:["Which sentence is in the past perfect tense?|She had finished her work.|She finishes her work.|She will finish her work.|She is finishing her work.","The wind whispered through the trees is an example of…|personification|simile|alliteration|hyperbole","~Choose the correct word: The weather will ___ our plans.|affect|effect|afect|effet","Pick the correct spelling.|definitely|definately|definitly|defanitely","Which word is a conjunction?|because|quickly|table|under"],
+6:["Time is a thief is an example of a…|metaphor|simile|idiom|pun","Which word is the best synonym for reluctant?|unwilling|eager|careless|famous","~Choose the correct pronoun: She and ___ went to the park.|I|me|myself|mine","Pick the correct spelling.|embarrass|embarass|embarrasss|imbarrass","~What is the simple subject of: The tall boy kicked the ball?|boy|ball|kicked|tall"],
+7:["She is as quiet as a mouse uses…|a simile|a metaphor|hyperbole|an idiom","~Choose the correct word: ___ coat is this?|Whose|Who’s|Whos|Whoes","Pick the correct spelling.|separate|seperate|separete|saparate","Which word is a preposition?|beneath|slowly|happy|jump","~What is the plural of potato?|potatoes|potatos|potatoe|potatoess"],
+8:["Which sentence uses the active voice?|The chef cooked the meal.|The meal was cooked by the chef.|The meal had been cooked.|Cooking was done by the chef.","Which word is the best antonym for scarce?|abundant|rare|limited|thin","Pick the correct spelling.|accommodate|accomodate|acommodate|accommadate","The room was a freezer is an example of a…|metaphor|simile|idiom|oxymoron","~What is the past participle of write? I have ___ a letter.|written|wrote|writed|writen"]
+};
+
+const addE=(k,...s)=>{ELA[k]=(ELA[k]||[]).concat(s)};
+addE(0,"Which word is the name of an animal?|dog|run|red|jump","Which animal says moo?|cow|cat|dog|fish");
+addE(1,"Which word is a verb?|jump|table|blue|happy","What is the opposite of up?|down|over|high|top");
+addE(2,"Which word is a noun? The dog ran fast.|dog|ran|fast|the","~What is the past tense of run?|ran|runned|running|runs");
+addE(3,"What does the prefix un- mean?|not|again|before|many","Which sentence is written correctly?|My dog is big.|my dog is big.|My dog Is big.|my Dog is big.");
+addE(4,"A word that means the same as another word is a…|synonym|antonym|prefix|noun","Which is a proper noun?|Chicago|city|river|town");
+addE(5,"Which is a simile?|as brave as a lion|The sun smiled|He ran fast|a loud noise","~What is the plural of mouse?|mice|mouses|mices|meese");
+addE(6,"What is the job of a topic sentence?|to state the main idea|to end the story|to list facts|to quote a source","~What is an antonym of generous?|stingy|kind|giving|wealthy");
+addE(7,"What is a thesis in an argument?|the main claim|a supporting quote|a transition|the title","~What is the adjective form of beauty?|beautiful|beautifully|beautify|beauties");
+addE(8,"‘Verbose’ most nearly means…|wordy|silent|clear|angry","Which sentence uses a colon correctly?|You need three things: eggs, milk, and flour.|You need: three things eggs, milk, and flour.|You need three: things eggs, milk, and flour.|You: need three things eggs, milk, and flour.");
+addE(9,"Foreshadowing is when an author…|hints at events to come|describes a setting|repeats a sound|compares using like","Pick the correct spelling.|conscience|consience|conscence|concience","~What is the term for a word that imitates a sound, such as buzz?|onomatopoeia|alliteration|assonance|irony","Which sentence has a misplaced modifier?|Walking to school, the rain soaked me.|I walked to school in the rain.|The rain soaked me on my walk.|I got soaked walking to school.","A narrator who knows every character’s thoughts is…|omniscient|limited|first person|unreliable");
+addE(10,"~What is it called when the audience knows something a character does not?|dramatic irony|situational irony|verbal irony|foreshadowing","Which sentence uses a semicolon correctly?|I was tired; I kept working.|I was; tired I kept working.|I was tired; and I kept working.|I; was tired I kept working.","Pick the correct spelling.|occurrence|occurence|occurrance|ocurrence","‘Ephemeral’ most nearly means…|short-lived|ancient|powerful|hidden","Which is an example of an allusion?|He met his Waterloo.|He lost the game.|She ran quickly.|The sky was gray.");
+addE(11,"What is the purpose of a thesis statement?|to state the main argument|to list sources|to end the essay|to define every term","~Which rhetorical appeal uses logic and evidence?|logos|ethos|pathos|kairos","Pick the correct spelling.|mischievous|mischievious|mischevious|mischeivous","‘Ubiquitous’ most nearly means…|found everywhere|extremely rare|dangerous|quiet","Which is a correct use of whom?|To whom did you speak?|Whom is at the door?|Whom called you?|Whom went home?");
+addE(12,"~Which rhetorical appeal is aimed at emotion?|pathos|logos|ethos|syntax","Which of these is a logical fallacy?|ad hominem|thesis|analogy|citation","‘Sycophant’ most nearly means…|flatterer|critic|ruler|teacher","Pick the correct spelling.|pronunciation|pronounciation|pronunsiation|pronunctiation","A literary work’s central message is its…|theme|plot|setting|tone");
+addE(13,"In MLA style, what usually ends a paper?|a Works Cited list|an abstract|a glossary|an index","~What is the term for presenting someone else’s work as your own?|plagiarism|paraphrase|citation|synthesis","A claim the whole paper argues for is the…|thesis|footnote|signpost|hook","‘Pragmatic’ most nearly means…|practical|idealistic|angry|careless","Which source is the most scholarly?|a peer-reviewed journal|a personal blog|a social media post|an advertisement");
+
+function opts(a){
+  const s=new Set([a]),d=Number.isInteger(a)?1:.1;
+  for(const o of sh([1,-1,2,-2,3,-3,10,-10])){
+    if(s.size>=4)break;
+    const v=Math.round((a+o*d)*10)/10;
+    if(v>=0||a<0)s.add(v);
+  }
+  return sh([...s]);
+}
+const parseCustom=()=>(cfg.custom||'').split('\n').map(l=>l.split('|').map(s=>s.trim())).filter(p=>p.length>=2&&p[0]&&p[1]);
+
+let mode=cfg.mode||'mix',cur,done=false,sc=0,tot=0,st=0,rq=0,rc=0,locked=false,lastQ='';
+const el={q:$('q'),ch:$('ch'),ans:$('ans'),go:$('go'),fb:$('fb'),tag:$('tag'),hint:$('hint')};
+
+function build(){
+  const cu=parseCustom();let q;
+  const on=[cfg.math&&'math',cfg.ela&&'ela'].filter(Boolean);
+  if(cu.length&&(cfg.only||!on.length||Math.random()<.3)){
+    const [t,a,...w]=P(cu),wr=w.filter(Boolean).slice(0,3);
+    q={type:'custom',q:t,say:t.replace(/_{2,}/g,'blank'),a,typ:true,all:wr.length?sh([a,...wr]):null};
+  }else{
+    if(!on.length)on.push('math');
+    const sub=mode==='mix'||!on.includes(mode)?P(on):mode;
+    if(sub==='math'){q=P(MATH[cfg.grade])();q.type='math';q.typ=true;q.all=opts(q.a)}
+    else{
+      let [t,a,...w]=P(ELA[cfg.grade]).split('|');const typ=t[0]==='~';if(typ)t=t.slice(1);
+      q={type:'ela',q:t,say:t.replace(/___/g,'blank'),a,typ,all:sh([a,...w])};
+    }
+  }
+  const mc=!q.typ?true:!q.all?false:cfg.style==='mc'?true:cfg.style==='type'?false:Math.random()<.5;
+  q.choices=mc?q.all:null;
+  return q;
+}
+
+function nextQ(){
+  if('speechSynthesis' in window)speechSynthesis.cancel();
+  for(let t=0;t<6;t++){cur=build();if(cur.q!==lastQ)break}
+  lastQ=cur.q;render();
+}
+
+function render(){
+  done=false;
+  el.tag.textContent=cur.type==='custom'?'Custom question':(cur.type==='math'?'Math':'ELA')+', '+(cfg.grade>12?'College':'Grade '+GL[cfg.grade]);
+  el.q.textContent=cur.q;el.q.className='q '+(cur.type==='math'?'math':'ela');
+  el.ch.innerHTML='';
+  if(cur.choices)cur.choices.forEach((c,i)=>{
+    const b=document.createElement('button');b.type='button';b.className='c';
+    b.innerHTML='<b>'+'ABCD'[i]+'</b><i class="sp" role="button" aria-label="Hear this choice">🔊</i><span></span>';b.lastChild.textContent=c;
+    b.querySelector('.sp').onclick=e=>{e.stopPropagation();sayText('Option '+'ABCD'[i]+'. '+c)};
+    b.onclick=()=>check(String(c));el.ch.append(b);
+  });
+  el.ans.value='';el.ans.readOnly=false;
+  el.ans.inputMode=cur.type==='math'&&cfg.grade<6?'decimal':'text';
+  el.ans.placeholder=cur.choices?'Type the answer or a letter':'Type your answer';
+  el.hint.textContent=cur.choices?'Tap a choice, or type the answer or its letter (A to D).':'';
+  el.fb.textContent='';el.fb.className='';el.go.textContent='Check';
+  el.ans.focus({preventScroll:true});
+  if(cfg.autoQ&&tot>0)speak();
+}
+
+const nz=s=>String(s).toLowerCase().replace(/[^a-z0-9]/g,'');
+function check(v){
+  if(done)return;
+  v=String(v).trim();if(!v)return;
+  if(cur.choices&&/^[a-d]$/i.test(v)){
+    const c=cur.choices['abcd'.indexOf(v.toLowerCase())];
+    if(c===undefined)return;v=String(c);
+  }
+  let ok;
+  if(cur.type==='math'){
+    const n=parseFloat(v.replace('−','-'));
+    if(isNaN(n)){el.fb.className='bad';el.fb.textContent='Please type a number.';return}
+    ok=Math.abs(n-cur.a)<1e-9;
+  }else ok=nz(v)===nz(cur.a);
+  done=true;tot++;rq++;
+  if(ok){sc++;rc++;st++}else st=0;
+  $('sc').textContent=sc;$('tot').textContent=tot;$('st').textContent=st;$('rq').textContent=rq;
+  el.fb.className=ok?'ok':'bad';
+  el.fb.textContent=ok?'Correct! Nice work.':'Not quite. The answer is '+cur.a+'.';
+  if(cfg.sayAns)sayText((ok?'Correct! ':'Not quite. ')+'The answer is '+ansSay()+'.');
+  [...el.ch.children].forEach(b=>{
+    const t=b.lastChild.textContent;
+    if(t===String(cur.a))b.classList.add('ok');
+    else if(!ok&&nz(t)===nz(v))b.classList.add('bad');
+  });
+  el.ans.readOnly=true;el.go.textContent=rq>=cfg.n?'See results':'Next question';el.go.focus();
+}
+
+function speak(){
+  if(!('speechSynthesis' in window)){el.fb.className='bad';el.fb.textContent='Sound is not supported in this browser.';return}
+  let t=cur.say;
+  if(cur.choices&&cfg.sayCh)t+=' The choices are: '+cur.choices.map((c,i)=>'Option '+'ABCD'[i]+'. '+c).join('. ')+'.';
+  if(done)t+=' The answer is '+ansSay()+'.';
+  sayText(t);
+}
+let voices=[];
+const BAD=/albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|fred|junior|ralph|kathy/i;
+function score(v){
+  const n=v.name;let s=0;
+  if(/natural|neural/i.test(n))s+=6;
+  if(/premium|enhanced/i.test(n))s+=5;
+  if(/online/i.test(n))s+=2;
+  if(/google us english|samantha|ava|allison|aria|jenny|zoe|serena|karen|daniel/i.test(n))s+=3;
+  if(v.lang==='en-US')s+=2;
+  if(!v.localService)s+=1;
+  if(BAD.test(n))s-=20;
+  return s;
+}
+function pickVoice(){
+  if(cfg.voice){const v=voices.find(x=>x.name===cfg.voice);if(v)return v}
+  return [...voices].sort((a,b)=>score(b)-score(a))[0]||null;
+}
+function prep(t){return t.replace(/\s+/g,' ').replace(/_{2,}/g,', blank, ')}
+function fillVoices(){
+  const s=$('pvoice');
+  s.innerHTML='<option value="">Automatic (best available)</option>'+voices.map(v=>'<option value="'+v.name.replace(/"/g,'&quot;')+'">'+v.name+' ('+v.lang+')</option>').join('');
+  s.value=cfg.voice||'';
+}
+function loadVoices(){
+  if(!('speechSynthesis' in window))return;
+  voices=speechSynthesis.getVoices().filter(v=>/^en/i.test(v.lang));fillVoices();
+}
+if('speechSynthesis' in window){speechSynthesis.onvoiceschanged=loadVoices;loadVoices()}
+$('ptest').onclick=()=>{
+  const o={voice:cfg.voice,rate:cfg.rate};
+  cfg.voice=$('pvoice').value;cfg.rate=parseFloat($('prate').value)||.9;
+  sayText('Hi! This is how I sound. What is seven times eight? Option A. fifty-six.');
+  cfg.voice=o.voice;cfg.rate=o.rate;
+};
+function ansSay(){return typeof cur.a==='number'?String(cur.a).replace('-','negative '):cur.a}
+function sayText(t){
+  if(!('speechSynthesis' in window))return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(prep(t));u.rate=cfg.rate||.9;u.pitch=1;u.lang='en-US';
+  const v=pickVoice();if(v){u.voice=v;u.lang=v.lang}
+  setTimeout(()=>speechSynthesis.speak(u),60);
+}
+
+const today=()=>new Date().toDateString();
+function startRound(){rq=0;rc=0;$('rq').textContent=0;$('end').hidden=true;$('qcard').hidden=false;nextQ()}
+function finishRound(){
+  const pass=rc>=cfg.need,was=locked;
+  if(locked&&pass){store.set('qq-pass',today());locked=false;$('lockbar').hidden=true}
+  $('qcard').hidden=true;$('end').hidden=false;
+  $('endt').textContent='You got '+rc+' of '+cfg.n+' right.';
+  $('endm').textContent=was?(pass?'Unlocked! Great job.':'You need '+cfg.need+' right to unlock. Try again.'):'Keep going, or stop for now.';
+  $('stop').hidden=locked;$('again').textContent=locked?'Try again':'Play another round';
+}
+function checkLock(){
+  if(!cfg.time||locked)return;
+  const [h,mi]=cfg.time.split(':'),d=new Date();d.setHours(+h,+mi,0,0);
+  if(Date.now()>=d&&store.get('qq-pass')!==today()){locked=true;applyCfg(true)}
+}
+
+function applyCfg(restart){
+  $('grade').innerHTML=GL.map((g,i)=>`<option value="${i}"${i===cfg.grade?' selected':''}>${g}</option>`).join('');
+  $('gw').hidden=!cfg.child;
+  $('subj').hidden=!(cfg.math&&cfg.ela&&!cfg.only);
+  $('rn').textContent=cfg.n;
+  $('lockbar').hidden=!locked;
+  $('lockbar').textContent='🔒 Quiz time! Get '+cfg.need+' of '+cfg.n+' right to unlock.';
+  if(cfg.lockSub)mode=cfg.mode||'mix';
+  document.querySelectorAll('#subj button').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.s===mode);b.disabled=!!cfg.lockSub});
+  $('sl').hidden=!cfg.lockSub;
+  if(restart)startRound();
+}
+
+// event wiring
+$('snd').onclick=speak;
+$('go').onclick=()=>done?(rq>=cfg.n?finishRound():nextQ()):check(el.ans.value);
+el.ans.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('go').click()}});
+$('grade').onchange=e=>{cfg.grade=+e.target.value;save();nextQ()};
+$('again').onclick=startRound;
+$('stop').onclick=()=>{$('endt').textContent='Nice work today!';$('endm').textContent='Come back any time.';$('stop').hidden=true;$('again').textContent='Start a new round'};
+document.querySelectorAll('#subj button').forEach(b=>b.onclick=()=>{
+  if(cfg.lockSub)return;
+  mode=b.dataset.s;cfg.mode=mode;save();
+  document.querySelectorAll('#subj button').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  nextQ();
+});
+
+// parent panel
+const fillGrades=()=>{$('pg').innerHTML=GL.map((g,i)=>`<option value="${i}">${g}</option>`).join('')};
+function openPanel(){
+  $('pp').hidden=false;$('pv1').hidden=false;$('pv2').hidden=true;$('pin').value='';$('pinfb').textContent='';
+  $('pt1').textContent=cfg.pin?'Enter parent PIN':'Create a parent PIN';
+  $('pt2').textContent=cfg.pin?'':'Choose 4 digits. You will need it to change settings.';
+  $('pin').focus();
+}
+function showSettings(){
+  $('pv1').hidden=true;$('pv2').hidden=false;fillGrades();
+  $('pmode').value=cfg.mode||'mix';$('plock').checked=cfg.lockSub;$('pm').checked=cfg.math;$('pe').checked=cfg.ela;$('pg').value=cfg.grade;$('pc').checked=cfg.child;
+  $('pn').value=cfg.n;$('pneed').value=cfg.need;$('ps').value=cfg.style;$('ptime').value=cfg.time;
+  $('po').checked=cfg.only;$('pcu').value=cfg.custom;$('pnew').value='';$('psa').checked=cfg.sayAns;$('pch').checked=cfg.sayCh;fillVoices();$('prate').value=cfg.rate||.9;$('pq').checked=cfg.autoQ;
+}
+$('parent').onclick=openPanel;
+$('pinx').onclick=$('pclose').onclick=()=>{$('pp').hidden=true};
+$('pinok').onclick=()=>{
+  const v=$('pin').value.trim();
+  if(!cfg.pin){
+    if(!/^\d{4}$/.test(v)){$('pinfb').textContent='Please enter exactly 4 digits.';return}
+    cfg.pin=v;save();showSettings();
+  }else if(v===cfg.pin)showSettings();
+  else{$('pinfb').textContent='Wrong PIN. Try again.';$('pin').value=''}
+};
+$('pin').addEventListener('keydown',e=>{if(e.key==='Enter')$('pinok').click()});
+$('psave').onclick=()=>{
+  cfg.mode=$('pmode').value;cfg.lockSub=$('plock').checked;mode=cfg.mode;cfg.math=$('pm').checked;cfg.ela=$('pe').checked;cfg.grade=+$('pg').value;cfg.child=$('pc').checked;
+  cfg.n=Math.min(50,Math.max(1,parseInt($('pn').value)||10));
+  cfg.need=Math.min(cfg.n,Math.max(1,parseInt($('pneed').value)||7));
+  cfg.style=$('ps').value;cfg.sayAns=$('psa').checked;cfg.sayCh=$('pch').checked;cfg.voice=$('pvoice').value;cfg.rate=parseFloat($('prate').value)||.9;cfg.autoQ=$('pq').checked;cfg.time=$('ptime').value;cfg.only=$('po').checked;cfg.custom=$('pcu').value;
+  if(/^\d{4}$/.test($('pnew').value))cfg.pin=$('pnew').value;
+  save();$('pp').hidden=true;applyCfg(true);checkLock();
+};
+$('punlock').onclick=()=>{store.set('qq-pass',today());locked=false;$('pp').hidden=true;applyCfg(true)};
+
+applyCfg(false);
+startRound();
+checkLock();
+setInterval(checkLock,20000);
+document.addEventListener('visibilitychange',checkLock);
+</script>
+</body>
+</html>
